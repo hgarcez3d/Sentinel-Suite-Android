@@ -1,0 +1,6 @@
+{
+  "name": "Sentinel AI Security Suite",
+  "description": "Mobile security suite integrating Nmap topology, live packet tracing, forensic mirroring, and First Mate Popeye reports to the Wisdom Sentinel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

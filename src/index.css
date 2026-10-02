@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    height: 100%;
+    height: 100dvh;
+    background-color: #080c14;
+    color: #f1f5f9;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* Safe area padding utilities for mobile browser URL/navigation bars */
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+.h-dvh {
+  height: 100dvh;
+}
+
+/* Custom cyber scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #00e5ff;
+}
+
+/* Pulsing Halos in D3 SVG */
+@keyframes pulseCritical {
+  0% {
+    r: 38px;
+    opacity: 0.6;
+  }
+  50% {
+    r: 52px;
+    opacity: 0.15;
+  }
+  100% {
+    r: 38px;
+    opacity: 0.6;
+  }
+}
+
+@keyframes pulseWarning {
+  0% {
+    r: 34px;
+    opacity: 0.5;
+  }
+  50% {
+    r: 44px;
+    opacity: 0.15;
+  }
+  100% {
+    r: 34px;
+    opacity: 0.5;
+  }
+}
+
+.pulse-halo-critical {
+  animation: pulseCritical 2s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.pulse-halo-warning {
+  animation: pulseWarning 2.2s infinite ease-in-out;
+  transform-origin: center;
+}
