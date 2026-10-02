@@ -56,6 +56,10 @@ export const TrainingClipVisualCanvas: React.FC<TrainingClipVisualCanvasProps> =
         renderPacketSniffScene(ctx, width, height, time, playbackProgress);
       } else if (scene.visualGraphicType === 'ammo_forge_script') {
         renderAmmoForgeScene(ctx, width, height, time, playbackProgress);
+      } else if (scene.visualGraphicType === 'nmap_quarantine') {
+        renderNmapQuarantineScene(ctx, width, height, time, playbackProgress);
+      } else if (scene.visualGraphicType === 'wisdom_legal_export') {
+        renderWisdomLegalScene(ctx, width, height, time, playbackProgress);
       } else {
         renderRadarBlackoutScene(ctx, width, height, time, playbackProgress);
       }
@@ -401,6 +405,161 @@ export const TrainingClipVisualCanvas: React.FC<TrainingClipVisualCanvasProps> =
       ctx.font = '8px monospace';
       ctx.fillText('DOUBLE TAP DISPLAY TO UNLOCK', cx, cy + 38);
     }
+  };
+
+  // SCENE 5: Nmap Recon & Network Host Isolation
+  const renderNmapQuarantineScene = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    time: number,
+    progress: number
+  ) => {
+    const cx = width / 2;
+    const cy = height / 2;
+    const isQuarantined = progress > 0.45;
+
+    // Topology Gateway (Central Node)
+    ctx.fillStyle = '#0d1829';
+    ctx.strokeStyle = '#00e5ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx - 100, cy, 28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#00e5ff';
+    ctx.font = 'bold 9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('GATEWAY', cx - 100, cy - 4);
+    ctx.fillStyle = '#88c0d0';
+    ctx.font = '7.5px monospace';
+    ctx.fillText('192.168.1.1', cx - 100, cy + 8);
+
+    // Connecting Subnet Wire
+    ctx.strokeStyle = isQuarantined ? 'rgba(255, 68, 68, 0.4)' : 'rgba(0, 229, 255, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(cx - 72, cy);
+    ctx.lineTo(cx + 60, cy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Compromised Target Host
+    ctx.fillStyle = isQuarantined ? '#1c0d12' : '#151b2b';
+    ctx.strokeStyle = isQuarantined ? '#ff3366' : '#ffaa00';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(cx + 60, cy - 35, 110, 70, 10);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = isQuarantined ? '#ff3366' : '#ffaa00';
+    ctx.font = 'bold 9.5px monospace';
+    ctx.fillText(isQuarantined ? 'ISOLATED HOST' : 'TARGET HOST', cx + 115, cy - 18);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '8px monospace';
+    ctx.fillText('192.168.1.185 (SMB 445)', cx + 115, cy - 4);
+
+    if (isQuarantined) {
+      // Glowing red quarantine barrier
+      ctx.strokeStyle = '#ff3366';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx + 115, cy, 52, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ff3366';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText('QUARANTINED', cx + 115, cy + 14);
+      ctx.fillStyle = '#88c0d0';
+      ctx.font = '7.5px monospace';
+      ctx.fillText('0 LATERAL PACKETS', cx + 115, cy + 26);
+    } else {
+      // Active SYN scanning pulses
+      const scanX = cx - 72 + ((time * 100) % 132);
+      ctx.fillStyle = '#00ffaa';
+      ctx.beginPath();
+      ctx.arc(scanX, cy, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffaa00';
+      ctx.font = 'bold 8.5px monospace';
+      ctx.fillText('SYN PROBE (CVE-2024-38077)', cx + 115, cy + 16);
+    }
+  };
+
+  // SCENE 6: The Wisdom Sentinel Downlink & FRE 902(14) Legal Hash Seal
+  const renderWisdomLegalScene = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    time: number,
+    progress: number
+  ) => {
+    const cx = width / 2;
+    const cy = height / 2;
+
+    // Left: The Wisdom Sentinel (Web Station)
+    ctx.fillStyle = '#09152b';
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(40, cy - 50, 110, 100, 12);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('THE WISDOM', 95, cy - 25);
+    ctx.fillText('SENTINEL', 95, cy - 12);
+    ctx.fillStyle = '#a855f7';
+    ctx.font = '8px monospace';
+    ctx.fillText('CENTRAL REGISTRY', 95, cy + 5);
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('(NON-INTERACTIVE)', 95, cy + 20);
+
+    // Downlink Beam
+    const beamPulse = Math.sin(time * 4) * 0.3 + 0.7;
+    ctx.strokeStyle = `rgba(0, 229, 255, ${beamPulse})`;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(150, cy);
+    ctx.lineTo(width - 150, cy);
+    ctx.stroke();
+
+    // Moving telemetry packets
+    for (let i = 0; i < 4; i++) {
+      const pOffset = (time * 1.2 + i * 0.25) % 1;
+      const px = 150 + pOffset * (width - 300);
+      ctx.fillStyle = '#00ffaa';
+      ctx.beginPath();
+      ctx.arc(px, cy, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Right: First Mate Popeye (Mobile Node) & Legal Seal
+    ctx.fillStyle = '#0c1b18';
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(width - 150, cy - 50, 110, 100, 12);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#10b981';
+    ctx.font = 'bold 9px monospace';
+    ctx.fillText('FIRST MATE', width - 95, cy - 25);
+    ctx.fillText('POPEYE', width - 95, cy - 12);
+    ctx.fillStyle = '#f59e0b';
+    ctx.font = '8px monospace';
+    ctx.fillText('DAILY CARD SYNC', width - 95, cy + 5);
+
+    // Legal Seal Stamp
+    ctx.fillStyle = progress > 0.5 ? '#10b981' : '#38bdf8';
+    ctx.font = 'bold 8px monospace';
+    ctx.fillText(progress > 0.5 ? '✔ FRE 902(14) SEALED' : 'AUDIT HASHING...', width - 95, cy + 24);
   };
 
   return (

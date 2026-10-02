@@ -678,6 +678,10 @@ export const App: React.FC = () => {
             setIsAmmoFactoryOpen(true);
           } else if (actionType === 'open_radar') {
             setActiveTab('radar');
+          } else if (actionType === 'open_nmap') {
+            setIsNmapDrawerOpen(true);
+          } else if (actionType === 'open_wisdom') {
+            setActiveTab('wisdom_dossier');
           }
         }}
       />
