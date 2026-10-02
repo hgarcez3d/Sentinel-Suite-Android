@@ -14,7 +14,8 @@ import {
   Shield,
   Zap,
   WifiOff,
-  Lock
+  Lock,
+  Film
 } from 'lucide-react';
 import { SecurityStatus, DeviceType } from '../types/network';
 
@@ -38,6 +39,7 @@ interface MobileTopBarProps {
   onNavigatePhysical: () => void;
   onOpenAmmoFactory?: () => void;
   onOpenInterceptor?: () => void;
+  onOpenTrainingModal?: () => void;
   isAirGapActive?: boolean;
   onToggleAirGap?: () => void;
   antiTamperActive?: boolean;
@@ -63,6 +65,7 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
   onNavigatePhysical,
   onOpenAmmoFactory,
   onOpenInterceptor,
+  onOpenTrainingModal,
   isAirGapActive = false,
   onToggleAirGap,
   antiTamperActive
@@ -193,6 +196,18 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
             >
               <Zap size={12} className="text-cyan-400" />
               <span>Ammo</span>
+            </button>
+          )}
+
+          {/* Tactical Video Briefing / Movie Clips */}
+          {onOpenTrainingModal && (
+            <button
+              onClick={onOpenTrainingModal}
+              className="px-2 py-1 rounded-lg text-[10px] font-mono font-bold flex items-center gap-1 border bg-gradient-to-r from-cyan-950/80 to-blue-950/80 hover:from-cyan-900/80 hover:to-blue-900/80 border-cyan-400/60 text-cyan-200 transition-all shadow-xs"
+              title="Tactical Movie Clips: Watch interactive video briefings on how to use Sentinel"
+            >
+              <Film size={12} className="text-cyan-400" />
+              <span>Briefings</span>
             </button>
           )}
 

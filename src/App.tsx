@@ -18,6 +18,7 @@ import { EmergencyRapidFillModal } from './components/EmergencyRapidFillModal';
 import { CovertBlackoutScreen } from './components/CovertBlackoutScreen';
 import { AmmunitionFactoryModal } from './components/AmmunitionFactoryModal';
 import { CovertInterceptorModal } from './components/CovertInterceptorModal';
+import { TacticalVideoTrainingModal } from './components/TacticalVideoTrainingModal';
 import { dataInterceptorService } from './services/dataInterceptorService';
 import { MobileTopBar } from './components/MobileTopBar';
 import { MobileBottomNav, MobileTab } from './components/MobileBottomNav';
@@ -59,6 +60,8 @@ export const App: React.FC = () => {
   const [isRapidFillModalOpen, setIsRapidFillModalOpen] = useState(false);
   const [isAmmoFactoryOpen, setIsAmmoFactoryOpen] = useState(false);
   const [isInterceptorModalOpen, setIsInterceptorModalOpen] = useState(false);
+  const [isTrainingModalOpen, setIsTrainingModalOpen] = useState(false);
+  const [activeTrainingClipId, setActiveTrainingClipId] = useState<string>('clip-airgap');
   const [isAirGapActive, setIsAirGapActive] = useState<boolean>(() =>
     dataInterceptorService.getAirGapState().isAirGapActive
   );
@@ -363,6 +366,7 @@ export const App: React.FC = () => {
         onNavigatePhysical={() => setActiveTab('radar')}
         onOpenAmmoFactory={() => setIsAmmoFactoryOpen(true)}
         onOpenInterceptor={() => setIsInterceptorModalOpen(true)}
+        onOpenTrainingModal={() => setIsTrainingModalOpen(true)}
         isAirGapActive={isAirGapActive}
         onToggleAirGap={() => {
           const res = dataInterceptorService.toggleTrueAirGap();
@@ -656,6 +660,25 @@ export const App: React.FC = () => {
         onToggleAirGap={() => {
           const res = dataInterceptorService.getAirGapState();
           setIsAirGapActive(res.isAirGapActive);
+        }}
+      />
+
+      {/* 10. Tactical Training Video Briefings (Movie Clips Theater) */}
+      <TacticalVideoTrainingModal
+        isOpen={isTrainingModalOpen}
+        onClose={() => setIsTrainingModalOpen(false)}
+        initialClipId={activeTrainingClipId}
+        onActionTrigger={(actionType) => {
+          if (actionType === 'toggle_airgap') {
+            const res = dataInterceptorService.toggleTrueAirGap();
+            setIsAirGapActive(res.isAirGapActive);
+          } else if (actionType === 'open_interceptor') {
+            setIsInterceptorModalOpen(true);
+          } else if (actionType === 'open_ammo') {
+            setIsAmmoFactoryOpen(true);
+          } else if (actionType === 'open_radar') {
+            setActiveTab('radar');
+          }
         }}
       />
     </div>

@@ -246,7 +246,23 @@ Run command: 'ammunition run <script-id>' or use the 1-click button in the Ammun
     };
   }
 
-  // 10. STATUS
+  // 10. TACTICAL VIDEO BRIEFINGS & MOVIE CLIPS
+  if (lower.includes('briefing') || lower.includes('movie') || lower.includes('clip') || lower.includes('training') || lower.includes('how to use')) {
+    return {
+      command: cmd,
+      status: 'success',
+      timestamp,
+      output: `[TACTICAL VIDEO BRIEFINGS // MOVIE CLIPS THEATER]
+Available interactive training movie clips:
+  1. OP_BRIEFING_AIRGAP_01    : Mastering True Air-Gap (100% Radio Silence)
+  2. OP_BRIEFING_INTERCEPTOR_02: Covert Egress & Protocol Interceptor (SMS, Mic, Camera)
+  3. OP_BRIEFING_AMMO_03      : Ammunition Factory & SOAR Incident Playbooks
+  4. OP_BRIEFING_PHYSICAL_04  : Physical Defense (360° Radar & Covert Blackout)
+Tap 'Briefings' on the top bar to launch the cinematic theater with synced subtitles and voiceover.`
+    };
+  }
+
+  // 11. STATUS
   if (lower === 'status') {
     return {
       command: cmd,
