@@ -1,8 +1,9 @@
 import React from 'react';
 import {
-  Globe2,
+  Network,
   Radio,
   Bot,
+  Shield,
   ShieldAlert,
   FileText,
   Anchor
@@ -26,15 +27,15 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   const tabs = [
     {
       id: 'topology' as MobileTab,
-      label: 'Topology',
-      icon: Globe2,
+      label: 'Network',
+      icon: Network,
       badge: criticalCount > 0 ? criticalCount : null,
       badgeColor: 'bg-red-500'
     },
     {
       id: 'radar' as MobileTab,
-      label: 'RF Radar',
-      icon: Radio,
+      label: 'Physical Defense',
+      icon: Shield,
       badge: unresolvedBeaconsCount > 0 ? unresolvedBeaconsCount : null,
       badgeColor: 'bg-amber-500'
     },

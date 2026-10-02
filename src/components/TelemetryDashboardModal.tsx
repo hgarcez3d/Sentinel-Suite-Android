@@ -8,6 +8,7 @@ import {
   exportAuditAsLegalPDF
 } from '../utils/legalAuditExporter';
 import { wisdomSentinelWebService } from '../services/wisdomSentinelService';
+import { EmergencyRapidFillModal } from './EmergencyRapidFillModal';
 import {
   Cpu,
   HardDrive,
@@ -65,6 +66,7 @@ export const TelemetryDashboardModal: React.FC<TelemetryDashboardModalProps> = (
 }) => {
   const [activeTab, setActiveTab] = useState<'radar' | 'system' | 'physical' | 'report' | 'wisdom_dispatches'>('radar');
   const [fillTriggered, setFillTriggered] = useState(false);
+  const [isRapidFillActive, setIsRapidFillActive] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
 
@@ -72,9 +74,7 @@ export const TelemetryDashboardModal: React.FC<TelemetryDashboardModalProps> = (
   const monthlyAudit = wisdomSentinelWebService.getMonthlyAuditReport();
 
   const handleFill = () => {
-    onTriggerEmergencyFill();
-    setFillTriggered(true);
-    setTimeout(() => setFillTriggered(false), 3000);
+    setIsRapidFillActive(true);
   };
 
   const handleExportJSON = () => {
@@ -868,6 +868,17 @@ export const TelemetryDashboardModal: React.FC<TelemetryDashboardModalProps> = (
             </div>
           </div>
         )}
+
+        {/* Emergency Rapid Fill with Live Progress Bar */}
+        <EmergencyRapidFillModal
+          isOpen={isRapidFillActive}
+          onClose={() => setIsRapidFillActive(false)}
+          onConfirmExecute={() => {
+            onTriggerEmergencyFill();
+            setFillTriggered(true);
+            setTimeout(() => setFillTriggered(false), 4000);
+          }}
+        />
       </div>
     </div>
   );

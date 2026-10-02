@@ -16,7 +16,8 @@ import {
   Terminal,
   Activity,
   Layers,
-  FileCheck
+  FileCheck,
+  Zap
 } from 'lucide-react';
 import {
   buildLegalForensicAuditData,
@@ -33,6 +34,7 @@ interface MobilePopeyeHubViewProps {
   physicalSec: PhysicalSecurityState;
   dailyReport: DailyReport;
   onOpenTelemetryModal: () => void;
+  onOpenAmmoFactory?: () => void;
 }
 
 export const MobilePopeyeHubView: React.FC<MobilePopeyeHubViewProps> = ({
@@ -41,7 +43,8 @@ export const MobilePopeyeHubView: React.FC<MobilePopeyeHubViewProps> = ({
   systemMetrics,
   physicalSec,
   dailyReport,
-  onOpenTelemetryModal
+  onOpenTelemetryModal,
+  onOpenAmmoFactory
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'daily' | 'monthly' | 'export'>('daily');
   const [exportNotice, setExportNotice] = useState<string | null>(null);
@@ -102,6 +105,23 @@ export const MobilePopeyeHubView: React.FC<MobilePopeyeHubViewProps> = ({
             <span className="text-slate-300 font-bold">Forensic Monitor (Sync)</span>
           </div>
         </div>
+
+        {/* Ammunition Factory Trigger */}
+        {onOpenAmmoFactory && (
+          <div className="mt-2.5 pt-2 border-t border-amber-500/20 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-[10.5px] text-amber-200 font-mono">
+              <Zap size={13} className="text-cyan-400" />
+              <span>Ammunition Factory Playbooks Sync:</span>
+            </div>
+            <button
+              onClick={onOpenAmmoFactory}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 flex items-center gap-1 transition-all"
+            >
+              <span>Open Ammo Factory</span>
+              <ChevronRight size={11} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Sub tabs: Daily Card | Monthly Report | Legal Export */}

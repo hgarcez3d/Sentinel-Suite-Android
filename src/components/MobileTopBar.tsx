@@ -8,7 +8,13 @@ import {
   X,
   EyeOff,
   Network,
-  List
+  List,
+  Flame,
+  ShieldCheck,
+  Shield,
+  Zap,
+  WifiOff,
+  Lock
 } from 'lucide-react';
 import { SecurityStatus, DeviceType } from '../types/network';
 
@@ -28,8 +34,13 @@ interface MobileTopBarProps {
   isShellOpen: boolean;
   onToggleShell: () => void;
   onOpenTelemetryModal: () => void;
-  viewMode: 'graph' | 'list';
-  onToggleViewMode: () => void;
+  onOpenRapidFill: () => void;
+  onNavigatePhysical: () => void;
+  onOpenAmmoFactory?: () => void;
+  onOpenInterceptor?: () => void;
+  isAirGapActive?: boolean;
+  onToggleAirGap?: () => void;
+  antiTamperActive?: boolean;
 }
 
 export const MobileTopBar: React.FC<MobileTopBarProps> = ({
@@ -48,8 +59,13 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
   isShellOpen,
   onToggleShell,
   onOpenTelemetryModal,
-  viewMode,
-  onToggleViewMode
+  onOpenRapidFill,
+  onNavigatePhysical,
+  onOpenAmmoFactory,
+  onOpenInterceptor,
+  isAirGapActive = false,
+  onToggleAirGap,
+  antiTamperActive
 }) => {
   const [isSearchExpanded, setIsSearchExpanded] = React.useState(false);
 
@@ -86,27 +102,58 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
             </span>
           )}
 
-          {/* Clean View Toggle: List vs Network Graph */}
+          {/* TRUE AIR-GAP 100% OFFLINE KILL SWITCH BUTTON */}
+          {onToggleAirGap && (
+            <button
+              onClick={onToggleAirGap}
+              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold flex items-center gap-1 border transition-all ${
+                isAirGapActive
+                  ? 'bg-red-600 text-white border-red-400 shadow-md shadow-red-950 animate-pulse'
+                  : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white'
+              }`}
+              title={isAirGapActive ? 'True Air-Gap ACTIVE: All radios cut. Tap to reconnect.' : 'Engage True Air-Gap: 100% offline (Cut cellular, Wi-Fi, BLE, GPS)'}
+            >
+              <WifiOff size={12} className={isAirGapActive ? 'text-white' : 'text-slate-400'} />
+              <span>{isAirGapActive ? 'Air-Gap (OFFLINE)' : '100% Offline'}</span>
+            </button>
+          )}
+
+          {/* Covert Data & Protocol Interceptor Trigger */}
+          {onOpenInterceptor && (
+            <button
+              onClick={onOpenInterceptor}
+              className="px-2 py-1 rounded-lg text-[10px] font-mono font-bold flex items-center gap-1 border bg-purple-950/60 hover:bg-purple-900/60 border-purple-500/50 text-purple-300 transition-all shadow-xs"
+              title="Covert Data & Protocol Interceptor: Catch hidden background SMS, audio, photo, GPS leaks"
+            >
+              <EyeOff size={12} className="text-purple-400" />
+              <span>Intercept</span>
+            </button>
+          )}
+
+          {/* Quick Physical Defense & Covert Blackout Button */}
           <button
-            onClick={onToggleViewMode}
-            className={`px-2 py-1 rounded-lg text-[10px] font-bold font-mono flex items-center gap-1 border transition-all ${
-              viewMode === 'list'
-                ? 'bg-cyan-500/25 text-cyan-300 border-cyan-400 shadow-xs'
-                : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white'
+            onClick={onNavigatePhysical}
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold flex items-center gap-1 border transition-all ${
+              stealthModeActive
+                ? 'bg-red-500/30 text-red-300 border-red-500 shadow-md animate-pulse'
+                : antiTamperActive
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                : 'bg-slate-900 border-slate-800 text-slate-200 hover:text-white'
             }`}
-            title={viewMode === 'graph' ? 'Switch to Clean Practical List View' : 'Switch to Graph View'}
+            title="Physical Defense: Screen-Off Blackout & Covert Telemetry"
           >
-            {viewMode === 'graph' ? (
-              <>
-                <List size={12} className="text-cyan-400" />
-                <span>List View</span>
-              </>
-            ) : (
-              <>
-                <Network size={12} className="text-cyan-400" />
-                <span>Graph View</span>
-              </>
-            )}
+            <Shield size={12} className={stealthModeActive ? 'text-red-400' : antiTamperActive ? 'text-amber-400 animate-pulse' : 'text-cyan-400'} />
+            <span>Defense</span>
+          </button>
+
+          {/* Emergency Rapid-Fill Direct Trigger */}
+          <button
+            onClick={onOpenRapidFill}
+            className="px-2 py-1 rounded-lg text-[10px] font-mono font-bold flex items-center gap-1 border bg-red-950/60 hover:bg-red-900/60 border-red-500/50 text-red-300 transition-all shadow-xs"
+            title="Emergency Rapid-Fill (Wipe free blocks with noise)"
+          >
+            <Flame size={12} className="text-red-400" />
+            <span className="hidden xs:inline">Rapid-Fill</span>
           </button>
 
           {/* Quick Critical Filter Pill */}
@@ -136,6 +183,18 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
           >
             <Search size={14} />
           </button>
+
+          {/* Ammunition Factory Countermeasure Foundry */}
+          {onOpenAmmoFactory && (
+            <button
+              onClick={onOpenAmmoFactory}
+              className="px-2 py-1 rounded-lg text-[10px] font-mono font-bold flex items-center gap-1 border bg-cyan-950/60 hover:bg-cyan-900/60 border-cyan-500/50 text-cyan-300 transition-all shadow-xs"
+              title="Ammunition Factory: Automated Defense Playbooks & Scripts"
+            >
+              <Zap size={12} className="text-cyan-400" />
+              <span>Ammo</span>
+            </button>
+          )}
 
           {/* Synapse Autonomous Shell Terminal (with Voice/Jarvis) */}
           <button

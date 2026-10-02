@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { NetworkDevice, NetworkLink, SecurityStatus, DeviceType, ScanProfile, NmapLogLine } from './types/network';
 import { AgentRole, SystemAuditMetric, PhysicalSecurityState, DailyReport } from './types/agents';
 import { INITIAL_DEVICES, getInitialLinks, SCAN_PROFILES } from './data/initialData';
@@ -7,16 +7,21 @@ import {
   INITIAL_PHYSICAL_SECURITY,
   INITIAL_DAILY_REPORT
 } from './data/agentProfiles';
-import { NetworkGraph } from './components/NetworkGraph';
+import { NetworkSubnetManager } from './components/NetworkSubnetManager';
 import { DeviceDetailModal } from './components/DeviceDetailModal';
 import { AgentChatPanel } from './components/AgentChatPanel';
 import { ThreatIntelligencePanel } from './components/ThreatIntelligencePanel';
 import { TelemetryDashboardModal } from './components/TelemetryDashboardModal';
 import { ProximityRadar } from './components/ProximityRadar';
+import { PhysicalSecurityHub } from './components/PhysicalSecurityHub';
+import { EmergencyRapidFillModal } from './components/EmergencyRapidFillModal';
+import { CovertBlackoutScreen } from './components/CovertBlackoutScreen';
+import { AmmunitionFactoryModal } from './components/AmmunitionFactoryModal';
+import { CovertInterceptorModal } from './components/CovertInterceptorModal';
+import { dataInterceptorService } from './services/dataInterceptorService';
 import { MobileTopBar } from './components/MobileTopBar';
 import { MobileBottomNav, MobileTab } from './components/MobileBottomNav';
 import { MobilePopeyeHubView } from './components/MobilePopeyeHubView';
-import { CleanDeviceInventory } from './components/CleanDeviceInventory';
 import { InteractiveShellTerminal } from './components/InteractiveShellTerminal';
 import { NmapConsole } from './components/NmapConsole';
 import {
@@ -42,7 +47,6 @@ export const App: React.FC = () => {
 
   // Mobile Bottom Tab Navigation
   const [activeTab, setActiveTab] = useState<MobileTab>('topology');
-  const [viewMode, setViewMode] = useState<'graph' | 'list'>('graph');
 
   // Filters & Search
   const [filterStatus, setFilterStatus] = useState<SecurityStatus | null>(null);
@@ -52,6 +56,19 @@ export const App: React.FC = () => {
   // Agent Chat & Threat Intelligence state
   const [activeAgent, setActiveAgent] = useState<AgentRole>('popeye');
   const [isTelemetryModalOpen, setIsTelemetryModalOpen] = useState(false);
+  const [isRapidFillModalOpen, setIsRapidFillModalOpen] = useState(false);
+  const [isAmmoFactoryOpen, setIsAmmoFactoryOpen] = useState(false);
+  const [isInterceptorModalOpen, setIsInterceptorModalOpen] = useState(false);
+  const [isAirGapActive, setIsAirGapActive] = useState<boolean>(() =>
+    dataInterceptorService.getAirGapState().isAirGapActive
+  );
+
+  useEffect(() => {
+    const unsub = dataInterceptorService.subscribe(() => {
+      setIsAirGapActive(dataInterceptorService.getAirGapState().isAirGapActive);
+    });
+    return () => unsub();
+  }, []);
 
   // Mobile Shell Terminal Drawer state
   const [isShellOpen, setIsShellOpen] = useState(false);
@@ -342,37 +359,55 @@ export const App: React.FC = () => {
         isShellOpen={isShellOpen}
         onToggleShell={() => setIsShellOpen(prev => !prev)}
         onOpenTelemetryModal={() => setIsTelemetryModalOpen(true)}
-        viewMode={viewMode}
-        onToggleViewMode={() => setViewMode(prev => prev === 'graph' ? 'list' : 'graph')}
+        onOpenRapidFill={() => setIsRapidFillModalOpen(true)}
+        onNavigatePhysical={() => setActiveTab('radar')}
+        onOpenAmmoFactory={() => setIsAmmoFactoryOpen(true)}
+        onOpenInterceptor={() => setIsInterceptorModalOpen(true)}
+        isAirGapActive={isAirGapActive}
+        onToggleAirGap={() => {
+          const res = dataInterceptorService.toggleTrueAirGap();
+          addLog(
+            res.isAirGapActive
+              ? `[TRUE AIR-GAP] ENGAGED: 100% Radio Silence. Cellular, Wi-Fi, BLE & GPS cut.`
+              : `[TRUE AIR-GAP] DISENGAGED: Radio interfaces restored.`,
+            res.isAirGapActive ? 'warning' : 'info'
+          );
+        }}
+        antiTamperActive={physicalSec.antiTamperActive}
       />
+
+      {/* Sticky True Air-Gap Banner when 100% Offline Mode is Active */}
+      {isAirGapActive && (
+        <div className="shrink-0 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white px-3.5 py-1.5 flex items-center justify-between text-xs font-mono font-bold shadow-lg animate-in slide-in-from-top-1 duration-150">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+            <span className="truncate">
+              ⚡ TRUE AIR-GAP ACTIVE · 100% OFFLINE · CELLULAR, WI-FI, BLE & GPS HARDWARE CUT
+            </span>
+          </div>
+          <button
+            onClick={() => dataInterceptorService.toggleTrueAirGap()}
+            className="px-2.5 py-0.5 rounded bg-black/40 hover:bg-black/60 border border-white/40 text-[10px] uppercase font-bold shrink-0 transition-colors"
+          >
+            Reconnect
+          </button>
+        </div>
+      )}
 
       {/* 2. Main Mobile Screen Viewport (Tab Switching) */}
       <main className="flex-1 relative overflow-hidden flex flex-col">
-        {/* TAB 1: Network Topology Visualizer or Clean Practical Device Inventory */}
+        {/* TAB 1: Clean Structured Network Subnet Manager */}
         {activeTab === 'topology' && (
           <div className="flex-1 relative h-full w-full overflow-hidden flex flex-col">
-            {viewMode === 'graph' ? (
-              <NetworkGraph
-                devices={devices}
-                links={links}
-                selectedDevice={selectedDevice}
-                onSelectDevice={setSelectedDevice}
-                onClearSelection={() => setSelectedDevice(null)}
-                filterStatus={filterStatus}
-                filterType={filterType}
-                searchQuery={searchQuery}
-              />
-            ) : (
-              <CleanDeviceInventory
-                devices={devices}
-                selectedDevice={selectedDevice}
-                onSelectDevice={setSelectedDevice}
-                onToggleIsolation={handleToggleIsolation}
-                filterStatus={filterStatus}
-                filterType={filterType}
-                searchQuery={searchQuery}
-              />
-            )}
+            <NetworkSubnetManager
+              devices={devices}
+              selectedDevice={selectedDevice}
+              onSelectDevice={setSelectedDevice}
+              onToggleIsolation={handleToggleIsolation}
+              filterStatus={filterStatus}
+              filterType={filterType}
+              searchQuery={searchQuery}
+            />
 
             {/* Slide-over Device Inspection Drawer */}
             {selectedDevice && (
@@ -387,51 +422,29 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 2: Physical Security & Proximity RF Radar */}
+        {/* TAB 2: Physical Security & Proximity RF Radar (VALKYRIE DEFENSE & GEOFENCE) */}
         {activeTab === 'radar' && (
-          <div className="flex-1 overflow-y-auto bg-[#080c14] p-3.5 custom-scrollbar">
-            <div className="max-w-xl mx-auto space-y-4">
-              <div className="bg-[#0b101c] p-3 rounded-xl border border-slate-800 flex items-center justify-between">
-                <div>
-                  <h2 className="text-xs font-black uppercase text-cyan-400 tracking-wider">
-                    VALKYRIE PROXIMITY RF RADAR
-                  </h2>
-                  <p className="text-[10px] text-slate-400">
-                    Scanning BLE, Wi-Fi Pineapple probes & RF beacons within 150m boundary
-                  </p>
-                </div>
-                <button
-                  onClick={handleToggleAntiTamper}
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all border ${
-                    physicalSec.antiTamperActive
-                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
-                      : 'bg-slate-900 border-slate-800 text-slate-400'
-                  }`}
-                >
-                  {physicalSec.antiTamperActive ? 'TAMPER ARMED' : 'ARM SENSORS'}
-                </button>
-              </div>
-
-              <div className="bg-[#0c1322] border border-slate-800 rounded-2xl p-2 shadow-2xl flex items-center justify-center">
-                <ProximityRadar
-                  beacons={physicalSec.proximityBeacons}
-                  geofenceRadiusMeters={physicalSec.geofenceRadiusMeters}
-                />
-              </div>
-
-              {/* Quick Tamper Status Card */}
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-[#0e1626] p-2.5 rounded-xl border border-slate-800">
-                  <span className="text-[9.5px] font-mono text-slate-400 block mb-0.5">Enclosure Tamper:</span>
-                  <span className="text-emerald-400 font-bold font-mono">SEALED (Optical Intact)</span>
-                </div>
-                <div className="bg-[#0e1626] p-2.5 rounded-xl border border-slate-800">
-                  <span className="text-[9.5px] font-mono text-slate-400 block mb-0.5">Geofence Drift:</span>
-                  <span className="text-cyan-400 font-bold font-mono">&lt; 1.2m Accuracy</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <PhysicalSecurityHub
+            physicalSec={physicalSec}
+            systemMetrics={systemMetrics}
+            onToggleAntiTamper={handleToggleAntiTamper}
+            onToggleBlackout={handleToggleBlackout}
+            onOpenRapidFill={() => setIsRapidFillModalOpen(true)}
+            onUpdateGeofence={(meters) =>
+              setPhysicalSec(prev => ({ ...prev, geofenceRadiusMeters: meters }))
+            }
+            onToggleAirGap={() => {
+              const res = dataInterceptorService.toggleTrueAirGap();
+              addLog(
+                res.isAirGapActive
+                  ? `[TRUE AIR-GAP] ENGAGED: 100% Radio Silence. Cellular, Wi-Fi, BLE & GPS cut.`
+                  : `[TRUE AIR-GAP] DISENGAGED: Radio interfaces restored.`,
+                res.isAirGapActive ? 'warning' : 'info'
+              );
+            }}
+            onOpenInterceptor={() => setIsInterceptorModalOpen(true)}
+            isAirGapActive={isAirGapActive}
+          />
         )}
 
         {/* TAB 3: Multi-Agent Squad Chat (Popeye, Aegis, Kronos, Valkyrie, Synapse, Cipher) */}
@@ -469,6 +482,7 @@ export const App: React.FC = () => {
             physicalSec={physicalSec}
             dailyReport={dailyReport}
             onOpenTelemetryModal={() => setIsTelemetryModalOpen(true)}
+            onOpenAmmoFactory={() => setIsAmmoFactoryOpen(true)}
           />
         )}
       </main>
@@ -607,6 +621,43 @@ export const App: React.FC = () => {
           onRefreshIntegrityCheck={handleRefreshIntegrityCheck}
         />
       )}
+
+      {/* 6. Emergency Rapid-Fill Modal with Live Progress Bar */}
+      <EmergencyRapidFillModal
+        isOpen={isRapidFillModalOpen}
+        onClose={() => setIsRapidFillModalOpen(false)}
+        onConfirmExecute={handleTriggerEmergencyFill}
+      />
+
+      {/* 7. Covert Screen-Off Physical Defense Mode (Blackout + Live Geo/Audio/Visual Wiretap) */}
+      <CovertBlackoutScreen
+        isActive={physicalSec.stealthBlackoutMode}
+        onExit={handleToggleBlackout}
+        geofenceRadiusMeters={physicalSec.geofenceRadiusMeters}
+      />
+
+      {/* 8. Ammunition Factory: Automated Defense & Countermeasure Script Foundry */}
+      <AmmunitionFactoryModal
+        isOpen={isAmmoFactoryOpen}
+        onClose={() => setIsAmmoFactoryOpen(false)}
+        onSendToShell={(command) => {
+          setIsShellOpen(true);
+          addLog(`[SHELL DISPATCH] Queued Ammunition Protocol: ${command}`, 'command');
+        }}
+        onScriptExecuted={(script) => {
+          addLog(`[AMMUNITION FACTORY] Deployed ${script.codename} -> ${script.threatTarget}`, 'success');
+        }}
+      />
+
+      {/* 9. Covert Data & Protocol Interceptor (Anti-Exfiltration & True Air-Gap Sentinel) */}
+      <CovertInterceptorModal
+        isOpen={isInterceptorModalOpen}
+        onClose={() => setIsInterceptorModalOpen(false)}
+        onToggleAirGap={() => {
+          const res = dataInterceptorService.getAirGapState();
+          setIsAirGapActive(res.isAirGapActive);
+        }}
+      />
     </div>
   );
 };

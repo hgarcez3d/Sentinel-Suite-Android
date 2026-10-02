@@ -1,5 +1,3 @@
-import * as d3 from 'd3';
-
 export type DeviceType =
   | 'gateway'
   | 'access_point'
@@ -33,7 +31,7 @@ export interface Vulnerability {
   remediation: string;
 }
 
-export interface NetworkDevice extends d3.SimulationNodeDatum {
+export interface NetworkDevice {
   id: string;
   ip: string;
   mac: string;
@@ -67,7 +65,7 @@ export interface NetworkDevice extends d3.SimulationNodeDatum {
   radius?: number;
 }
 
-export interface NetworkLink extends d3.SimulationLinkDatum<NetworkDevice> {
+export interface NetworkLink {
   id: string;
   source: string | NetworkDevice;
   target: string | NetworkDevice;

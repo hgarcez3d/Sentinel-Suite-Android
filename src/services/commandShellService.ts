@@ -214,7 +214,39 @@ Nmap done: ${context.devices.length} IP addresses scanned in 1.48 seconds`
     };
   }
 
-  // 9. STATUS
+  // 9. AMMUNITION FACTORY PLAYBOOKS
+  if (lower.startsWith('ammo') || lower.startsWith('ammunition') || lower.startsWith('run script')) {
+    const isRun = lower.includes('run') || lower.includes('execute');
+    if (isRun) {
+      return {
+        command: cmd,
+        status: 'action_taken',
+        timestamp,
+        output: `[+] [AMMUNITION FACTORY] EXECUTING COUNTERMEASURE PROTOCOL
+[✓] SCRIPT: AEGIS_QUARANTINE_DROPPER.SH
+[✓] TARGET: Micro-segmentation & Lateral Traversal Kill
+[✓] Injecting kernel packet filter rules into iptables...
+[✓] Flushing bridge ARP table for rogue beacons...
+[+] SUCCESS: Ammunition playbook executed with exit code 0. Threat neutralized.`
+      };
+    }
+
+    return {
+      command: cmd,
+      status: 'success',
+      timestamp,
+      output: `[AMMUNITION FACTORY] Available Defense & Countermeasure Scripts:
+  • ammo-01-aegis-quarantine    : Subnet Micro-Segmentation & ARP Null-Route (ZERO-DAY)
+  • ammo-02-valkyrie-rf-scramble: RF / BLE Deception Air-Shield Scrambler (CRITICAL)
+  • ammo-03-synapse-honeytoken  : Canary Credential & Honeytoken Tripwire (HIGH)
+  • ammo-04-kronos-kernel-lock  : Immutable Memory Seal & PID Purge (CRITICAL)
+  • ammo-05-cipher-port-knock   : Dynamic Ephemeral Port-Knock Scramble (TACTICAL)
+  • ammo-06-wisdom-c2-sinkhole  : Wisdom Sentinel Threat Feed C2 Sinkhole (ZERO-DAY)
+Run command: 'ammunition run <script-id>' or use the 1-click button in the Ammunition Factory panel.`
+    };
+  }
+
+  // 10. STATUS
   if (lower === 'status') {
     return {
       command: cmd,
